@@ -1,7 +1,3 @@
-# First Dockerfile to build Flask web app container
-#
-
-# Set the base image to Ubuntu
 FROM alpine:3.5
 
 #File Author / Maintainer
