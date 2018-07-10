@@ -32,7 +32,6 @@ RUN virtualenv flask && \
   sed -i "s|LOG_FILE = 'logfile.log'|LOG_FILE = ''|g" /app/config.py; \
   sed -i "s|BASIC_ENABLED = True|BASIC_ENABLED = False|g" /app/config.py; \
   sed -i "s|SIGNUP_ENABLED = True|SIGNUP_ENABLED = False|g" /app/config.py; \
-  sed -i "s|PDNS_VERSION = '3.4.7'|PDNS_VERSION = '4.0.4'|g" /app/config.py; \
   sed -i "s|PRETTY_IPV6_PTR = False|PRETTY_IPV6_PTR = True|g" /app/config.py
 
 EXPOSE 9393

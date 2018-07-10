@@ -2,6 +2,12 @@
 set -eo pipefail
 
 RUNDBCONFIG='no'
+BIND_ADDRESS=${BIND_ADDRESS:-'0.0.0.0'}
+PDNS_VERSION=${PDNS_VERSION:-'4.1.3'
+
+if [ ! -z "$PDNS_VERSION" ]; then
+  sed -i "s|PDNS_VERSION = '.*|PDNS_VERSION = '${PDNS_VERSION}'|g" /app/config.py
+fi
 
 if [ ! -z $SECRET_KEY ]; then
   sed -i "s|SECRET_KEY = 'We are the world'|SECRET_KEY = '${SECRET_KEY}'|g" /app/config.py
@@ -46,10 +52,14 @@ fi
 
 if [ ! -z $LDAP_USERNAME ]; then
   sed -i "s|LDAP_USERNAME = 'cn=dnsuser,ou=users,ou=services,dc=duykhanh,dc=me'|LDAP_USERNAME = '${LDAP_USERNAME}'|g" /app/config.py
+else
+  sed -i "s|LDAP_USERNAME = 'cn=dnsuser,ou=users,ou=services,dc=duykhanh,dc=me'|LDAP_USERNAME = ''|g" /app/config.py
 fi
 
 if [ ! -z $LDAP_PASSWORD ]; then
   sed -i "s|LDAP_PASSWORD = 'dnsuser'|LDAP_PASSWORD = '${LDAP_PASSWORD}'|g" /app/config.py
+else
+  sed -i "s|LDAP_PASSWORD = 'dnsuser'|LDAP_PASSWORD = ''|g" /app/config.py
 fi
 
 if [ ! -z $LDAP_SEARCH_BASE ]; then

@@ -3,8 +3,7 @@
 Run with something like:
 
 ```
-docker run --name pdnsadmin-test -e BIND_ADDRESS=0.0.0.0 \
-  -e SECRET_KEY='a-very-secret-key' \
+docker run --name pdnsadmin-test -e SECRET_KEY='a-very-secret-key' \
   -e PORT='9393' \
   -e SQLA_DB_USER='powerdns_admin_user' \
   -e SQLA_DB_PASSWORD='exceptionallysecure' \
@@ -12,10 +11,8 @@ docker run --name pdnsadmin-test -e BIND_ADDRESS=0.0.0.0 \
   -e SQLA_DB_NAME='powerdns_admin_test' \
   -e LDAP_TYPE='ldap' \
   -e LDAP_URI='ldaps://ldap.jumpcloud.com:636' \
-  -e LDAP_USERNAME='uid=ldap,ou=Users,o=0000000000000000000000,dc=jumpcloud,dc=com' \
-  -e LDAP_PASSWORD='supersecretpassword' \
   -e LDAP_SEARCH_BASE='ou=Users,o=0000000000000000000000,dc=jumpcloud,dc=com' \
   -e PDNS_STATS_URL='http://192.168.1.200:8081/' \
   -e PDNS_API_KEY='sneakyapikey' \
-  -d -p 9393:9393/tcp really/powerdns-admin:latest
+  -d -p 9393:9393/tcp Mikroways/powerdns-admin:latest
 ```
