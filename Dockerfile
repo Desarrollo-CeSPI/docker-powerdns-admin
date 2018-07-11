@@ -12,7 +12,9 @@ RUN apk update && \
     libffi-dev \
     openldap-dev \
     build-base \
-    mariadb-dev && \
+    mariadb-dev \
+    libxslt-dev \
+    xmlsec-dev && \
     pip install -U pip && \
     rm -rf /var/cache/apk/*
 
