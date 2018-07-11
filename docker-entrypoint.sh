@@ -1,12 +1,15 @@
 #!/usr/bin/env sh
 set -eo pipefail
 
-RUNDBCONFIG='no'
 BIND_ADDRESS=${BIND_ADDRESS:-'0.0.0.0'}
-PDNS_VERSION=${PDNS_VERSION:-'4.1.3'
+PDNS_VERSION=${PDNS_VERSION:-'4.1.3'}
 
 if [ ! -z "$PDNS_VERSION" ]; then
   sed -i "s|PDNS_VERSION = '.*|PDNS_VERSION = '${PDNS_VERSION}'|g" /app/config.py
+fi
+
+if [ ! -z "$LOG_LEVEL" ]; then
+  sed -i s"|LOG_LEVEL = 'DEBUG'|LOG_LEVEL = '${LOG_LEVEL}'|g" /app/config.py
 fi
 
 if [ ! -z $SECRET_KEY ]; then
@@ -24,30 +27,28 @@ fi
 
 if [ ! -z $SQLA_DB_USER ]; then
   sed -i "s|SQLA_DB_USER = 'powerdnsadmin'|SQLA_DB_USER = '${SQLA_DB_USER}'|g" /app/config.py
-  RUNDBCONFIG='yes'
 fi
 
 if [ ! -z $SQLA_DB_PASSWORD ]; then
   sed -i "s|SQLA_DB_PASSWORD = 'powerdnsadminpassword'|SQLA_DB_PASSWORD = '${SQLA_DB_PASSWORD}'|g" /app/config.py
-  RUNDBCONFIG='yes'
 fi
 
 if [ ! -z $SQLA_DB_HOST ]; then
   sed -i "s|SQLA_DB_HOST = 'mysqlhostorip'|SQLA_DB_HOST = '${SQLA_DB_HOST}'|g" /app/config.py
-  RUNDBCONFIG='yes'
 fi
 
 if [ ! -z $SQLA_DB_NAME ]; then
   sed -i "s|SQLA_DB_NAME = 'powerdnsadmin'|SQLA_DB_NAME = '${SQLA_DB_NAME}'|g" /app/config.py
-  RUNDBCONFIG='yes'
 fi
 
 if [ ! -z $LDAP_TYPE ]; then
   sed -i "s|LDAP_TYPE = 'ldap'|LDAP_TYPE = '${LDAP_TYPE}'|g" /app/config.py
+  LDAP_ENABLED=1
 fi
 
 if [ ! -z $LDAP_URI ]; then
   sed -i "s|LDAP_URI = 'ldaps://your-ldap-server:636'|LDAP_URI = '${LDAP_URI}'|g" /app/config.py
+  LDAP_ENABLED=1
 fi
 
 if [ ! -z $LDAP_USERNAME ]; then
@@ -74,6 +75,14 @@ if [ ! -z $LDAP_FILTER ]; then
   sed -i "s|LDAP_FILTER = '(objectClass=inetorgperson)'|LDAP_FILTER = '${LDAP_FILTER}'|g" /app/config.py
 fi
 
+if [ ! -z $LDAP_BIND_TYPE ]; then
+  sed -i "s|LDAP_BIND_TYPE= 'direct'|LDAP_BIND_TYPE= '${LDAP_BIND_TYPE}'|g" /app/config.py
+fi
+
+if [ ! -z $LDAP_ENABLED ]; then
+  sed -i "s|LDAP_ENABLED = False|LDAP_ENABLED = True|g" /app/config.py
+fi
+
 if [ ! -z $PDNS_STATS_URL ]; then
   sed -i "s|PDNS_STATS_URL = 'http://172.16.214.131:8081/'|PDNS_STATS_URL = '${PDNS_STATS_URL}'|g" /app/config.py
 fi
@@ -84,8 +93,18 @@ fi
 
 . /app/flask/bin/activate
 
-if [ "${RUNDBCONFIG}"="yes" ]; then
-  python /app/create_db.py
-fi
 
-python /app/run.py
+echo "===> Assets management"
+echo "---> Running Yarn"
+yarn install --pure-lockfile
+
+echo "---> Running Flask assets"
+flask assets build
+
+echo "---> Running DB Migration"
+set +e
+flask db migrate -m "Upgrade BD Schema" --directory /app/migrations
+flask db upgrade --directory /app/migrations
+set -e
+
+gunicorn -t 120 --workers 4 --bind '0.0.0.0:9191' --log-level info app:app
