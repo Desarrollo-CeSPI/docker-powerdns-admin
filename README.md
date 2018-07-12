@@ -1,18 +1,49 @@
-# docker-powerdns-admin
+# docker image for PowerDNS Admin
 
-Run with something like:
+This image installs [PowerDNS Admin](https://github.com/ngoduykhanh/PowerDNS-Admin) application. As it's code is not tagged, we
+juts build it for the latest relase.
+
+This image is also inspired by its
+[fork](https://github.com/reallyreally/docker-powerdns-admin)
+
+## Sample docker-compose
+
 
 ```
-docker run --name pdnsadmin-test -e SECRET_KEY='a-very-secret-key' \
-  -e PORT='9393' \
-  -e SQLA_DB_USER='powerdns_admin_user' \
-  -e SQLA_DB_PASSWORD='exceptionallysecure' \
-  -e SQLA_DB_HOST='192.168.0.100' \
-  -e SQLA_DB_NAME='powerdns_admin_test' \
-  -e LDAP_TYPE='ldap' \
-  -e LDAP_URI='ldaps://ldap.jumpcloud.com:636' \
-  -e LDAP_SEARCH_BASE='ou=Users,o=0000000000000000000000,dc=jumpcloud,dc=com' \
-  -e PDNS_STATS_URL='http://192.168.1.200:8081/' \
-  -e PDNS_API_KEY='sneakyapikey' \
-  -d -p 9393:9393/tcp Mikroways/powerdns-admin:latest
+version: '2'
+services:
+  pdnsadmin:
+    image: mikroways/powerdns-admin
+    environment:
+      SECRET_KEY: 'a-very-secret-key'
+      SQLA_DB_USER: root
+      SQLA_DB_PASSWORD: root_pass
+      SQLA_DB_HOST: db
+      SQLA_DB_NAME: pdnsadmin
+      LOG_LEVEL: info
+      PDNS_STATS_URL: http://powerdns.example.com/
+      PDNS_API_KEY: 'powerdns-api-key'
+    ports:
+      - 9191:9191
+    depends_on:
+      - db
+    links:
+    - db
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: pdnsadmin
+    volumes:
+    -  pdns-db:/var/lib/mysql
+
+volumes:
+  pdns-db:
+
 ```
+
+## Configuration options
+
+If you take a look at `docker-entrypoint.sh` you can see which configuration
+options are accepted. For the moment, not every accepted option is supported.
+All available options are available within [config_template.py](https://github.com/ngoduykhanh/PowerDNS-Admin/blob/master/config_template.py)
