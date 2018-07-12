@@ -102,9 +102,7 @@ echo "---> Running Flask assets"
 flask assets build
 
 echo "---> Running DB Migration"
-set +e
-flask db migrate -m "Upgrade BD Schema" --directory /app/migrations
+flask db migrate -m "Upgrade BD Schema" --directory /app/migrations || true
 flask db upgrade --directory /app/migrations
-set -e
 
 gunicorn -t 120 --workers 4 --bind '0.0.0.0:9191' --log-level info app:app
