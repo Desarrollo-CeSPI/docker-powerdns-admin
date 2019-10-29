@@ -1,7 +1,7 @@
 # docker image for PowerDNS Admin
 
 This image installs [PowerDNS Admin](https://github.com/ngoduykhanh/PowerDNS-Admin) application. As it's code is not tagged, we
-juts build it for the latest relase.
+juts build it for the latest release.
 
 This image is also inspired by its
 [fork](https://github.com/reallyreally/docker-powerdns-admin)
